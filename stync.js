@@ -38,6 +38,10 @@ stync.begin = function(message) {
   return line;
 };
 
+stync.write = function(message) {
+  stync.begin(message).end();
+};
+
 stync.Line.prototype.write = function(text) {
   this.message += text;
   if (this === stync.lines.head) {
