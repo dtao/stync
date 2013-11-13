@@ -1,0 +1,5 @@
+{
+  "name": "stync",
+  "description": "Get a grip on stdout in your async code",
+  "version": "0.1.0"
+}
