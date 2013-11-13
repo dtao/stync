@@ -1,8 +1,19 @@
-var stync = { out: process.stdout };
+var stync = {
+  /**
+   * Where output should go. Defaults to `process.stdout`.
+   */
+  out: process.stdout
+};
 
+/**
+ * A linked list of {@link stync.Line}s, basically.
+ */
 stync.List = function() {
 };
 
+/**
+ * Adds a new line to the end of the list.
+ */
 stync.List.prototype.push = function(line) {
   if (!this.tail) {
     this.head = this.tail = line;
@@ -12,6 +23,9 @@ stync.List.prototype.push = function(line) {
   }
 };
 
+/**
+ * Removes and returns the first line in the list.
+ */
 stync.List.prototype.shift = function() {
   var head = this.head;
 
@@ -23,12 +37,22 @@ stync.List.prototype.shift = function() {
   return head;
 };
 
+/**
+ * A {@link stync.List} containing all of the lines being buffered.
+ */
 stync.lines = new stync.List();
 
+/**
+ * A line of text.
+ */
 stync.Line = function(message) {
   this.message = message;
 };
 
+/**
+ * Starts a new line that will be output to {@link stync.out} once its turn has
+ * come. Returns a {@link stync.Line}.
+ */
 stync.begin = function(message) {
   var line = new stync.Line(message);
   stync.lines.push(line);
@@ -38,10 +62,17 @@ stync.begin = function(message) {
   return line;
 };
 
+/**
+ * Adds a new, complete line to {@link stync.out}.
+ */
 stync.write = function(message) {
   stync.begin(message).end();
 };
 
+/**
+ * Adds text to the line. If this line is the current line, the text will be
+ * output to {@link stync.out} immediately.
+ */
 stync.Line.prototype.write = function(text) {
   this.message += text;
   if (this === stync.lines.head) {
@@ -49,6 +80,10 @@ stync.Line.prototype.write = function(text) {
   }
 };
 
+/**
+ * Ends the line. This will output any remaining text to {@link stync.out} and
+ * proceed to output any subsequent lines that are ready to print.
+ */
 stync.Line.prototype.end = function(text) {
   text = text || '';
 
