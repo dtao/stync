@@ -51,14 +51,21 @@ stync.Line.prototype.end = function(text) {
   this.message += text;
   this.ended = true;
 
-  if (this === stync.lines.head) {
+  var head = stync.lines.head;
+  if (this === head) {
     stync.out.write(text + '\n');
     stync.lines.shift();
-  }
 
-  while (stync.lines.head && stync.head.ended) {
-    stync.out.write(stync.head.message + '\n');
-    stync.lines.shift();
+    head = stync.lines.head;
+    while (head && head.ended) {
+      stync.out.write(head.message + '\n');
+      stync.lines.shift();
+      head = stync.lines.head;
+    }
+
+    if (head) {
+      stync.out.write(head.message);
+    }
   }
 };
 
