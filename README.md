@@ -8,7 +8,7 @@ This is just a little library to make things a bit more orderly.
 Usage
 -----
 
-```
+```javascript
 var async = require('async'),
     http  = require('http'),
     stync = require('stync');
