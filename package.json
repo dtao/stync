@@ -2,6 +2,7 @@
   "name": "stync",
   "description": "Get a grip on stdout in your async code",
   "version": "0.1.0",
+  "repository": "https://github.com/dtao/stync",
   "main": "stync.js",
   "devDependencies": {
     "async": "git://github.com/caolan/async"
