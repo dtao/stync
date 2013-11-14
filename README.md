@@ -25,11 +25,13 @@ var urls = [
 async.each(urls, function(url) {
   // stync.begin indicates you're starting a new line in your output;
   // it returns a message object that you can use to continue writing
-  // to the same line
+  // to the same line. Subsequent messages are queued up so that they will not
+  // print until this message is finished.
   var message = stync.begin('Fetching ' + url + '...');
 
   var request = http.get(url, function(response) {
-    // ...message.write adds more text to the current line...
+    // message.write adds more text to the current line, without progressing to
+    // the next message in the queue.
     message.write(' received response (' + response.statusCode + ')...');
 
     var bytesReceived = 0;
@@ -39,9 +41,9 @@ async.each(urls, function(url) {
     });
 
     response.on('end', function(data) {
-      // ...and message.end terminates the current line.
-      // Any subsequent lines (that you started w/ stync.begin) will now be
-      // written, when ready, in the order in which you created them
+      // message.end terminates the current line. Any subsequent lines (that you
+      // started w/ stync.begin) will now be written, when ready, in the order
+      // in which they were enqueued.
       message.end(' Finished: ' + bytesReceived + ' bytes');
     });
   });
