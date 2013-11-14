@@ -19,7 +19,8 @@ var urls = [
   "http://www.amazon.com",
   "http://www.stackoverflow.com",
   "http://www.reddit.com",
-  "http://www.github.com"
+  "http://www.github.com",
+  "invalid URL"
 ];
 
 async.each(urls, function(url) {
@@ -27,7 +28,7 @@ async.each(urls, function(url) {
   // it returns a message object that you can use to continue writing
   // to the same line. Subsequent messages are queued up so that they will not
   // print until this message is finished.
-  var message = stync.begin('Fetching ' + url + '...');
+  var message = stync.begin('Fetching "' + url + '"...');
 
   var request = http.get(url, function(response) {
     // message.write adds more text to the current line, without progressing to
@@ -44,10 +45,23 @@ async.each(urls, function(url) {
       // message.end terminates the current line. Any subsequent lines (that you
       // started w/ stync.begin) will now be written, when ready, in the order
       // in which they were enqueued.
-      message.end(' Finished: ' + bytesReceived + ' bytes');
+      message.end(' read ' + bytesReceived + ' bytes');
     });
   });
+
+  request.on('error', function(err) {
+    message.end(' ' + err);
+  });
 });
+
 ```
 
-In the above example, all URLs are requested in parallel. Suppose a response is received from the last URL first. Everything will still display properly because each `message` does not write itself to `process.stdout` until its predecessor has called `end`. In effect, messages "wait their turn" so that line-by-line the console output makes sense.
+In the above example, all URLs are requested in parallel. Suppose a response is received from the last URL first. Everything will still display properly because each `message` does not write itself to `process.stdout` until its predecessor has called `end`. In effect, messages "wait their turn" so that line-by-line the console output makes sense:
+
+    Fetching "http://www.google.com"... received response (200)... read 44887 bytes
+    Fetching "http://www.yahoo.com"... received response (200)... read 92645 bytes
+    Fetching "http://www.amazon.com"... received response (200)... read 170218 bytes
+    Fetching "http://www.stackoverflow.com"... received response (301)... read 148 bytes
+    Fetching "http://www.reddit.com"... received response (200)... read 111658 bytes
+    Fetching "http://www.github.com"... received response (301)... read 0 bytes
+    Fetching "invalid URL"... Error: connect ECONNREFUSED

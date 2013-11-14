@@ -6,15 +6,15 @@ var stync = {
 };
 
 /**
- * A linked list of {@link stync.Line}s, basically.
+ * A linked list of {@link stync.Message}s, basically.
  */
-stync.List = function() {
+stync.Queue = function() {
 };
 
 /**
- * Adds a new line to the end of the list.
+ * Adds a new {@link stync.Message} to the tail of the queue.
  */
-stync.List.prototype.push = function(line) {
+stync.Queue.prototype.push = function(line) {
   if (!this.tail) {
     this.head = this.tail = line;
   } else {
@@ -24,9 +24,9 @@ stync.List.prototype.push = function(line) {
 };
 
 /**
- * Removes and returns the first line in the list.
+ * Removes and returns the {@link stync.Message} from the head of the queue.
  */
-stync.List.prototype.shift = function() {
+stync.Queue.prototype.shift = function() {
   var head = this.head;
 
   if (!head) {
@@ -38,72 +38,73 @@ stync.List.prototype.shift = function() {
 };
 
 /**
- * A {@link stync.List} containing all of the lines being buffered.
+ * A {@link stync.Queue} containing all of the messages being buffered.
  */
-stync.lines = new stync.List();
+stync.messages = new stync.Queue();
 
 /**
- * A line of text.
+ * A message to (sooner or later) print to {@link stync.out}.
  */
-stync.Line = function(message) {
-  this.message = message;
+stync.Message = function(text) {
+  this.text = text;
 };
 
 /**
- * Starts a new line that will be output to {@link stync.out} once its turn has
- * come. Returns a {@link stync.Line}.
+ * Starts a new message that will print to {@link stync.out} once it reaches the
+ * head of the queue. Returns a {@link stync.Message}.
  */
-stync.begin = function(message) {
-  var line = new stync.Line(message);
-  stync.lines.push(line);
-  if (line === stync.lines.head) {
-    stync.out.write(message);
+stync.begin = function(text) {
+  var message = new stync.Message(text);
+  stync.messages.push(message);
+  if (message === stync.messages.head) {
+    stync.out.write(text);
   }
-  return line;
+  return message;
 };
 
 /**
- * Adds a new, complete line to {@link stync.out}.
+ * Adds a new, ready-to-print {@link stync.Message} to the queue.
  */
-stync.write = function(message) {
-  stync.begin(message).end();
+stync.write = function(text) {
+  stync.begin(text).end();
 };
 
 /**
- * Adds text to the line. If this line is the current line, the text will be
- * output to {@link stync.out} immediately.
+ * Adds text to the message. If this message is at the head of the queue, the
+ * text will print to {@link stync.out} immediately.
  */
-stync.Line.prototype.write = function(text) {
-  this.message += text;
-  if (this === stync.lines.head) {
+stync.Message.prototype.write = function(text) {
+  this.text += text;
+  if (this === stync.messages.head) {
     stync.out.write(text);
   }
 };
 
 /**
- * Ends the line. This will output any remaining text to {@link stync.out} and
- * proceed to output any subsequent lines that are ready to print.
+ * Ends the message. This will output the specified text to {@link stync.out}
+ * and proceed to the next message in the queue, continuing to print messages as
+ * they are completed.
  */
-stync.Line.prototype.end = function(text) {
+stync.Message.prototype.end = function(text) {
   text = text || '';
 
-  this.message += text;
+  this.text += text;
   this.ended = true;
 
-  var head = stync.lines.head;
+  var head = stync.messages.head;
   if (this === head) {
     stync.out.write(text + '\n');
-    stync.lines.shift();
+    stync.messages.shift();
 
-    head = stync.lines.head;
+    head = stync.messages.head;
     while (head && head.ended) {
-      stync.out.write(head.message + '\n');
-      stync.lines.shift();
-      head = stync.lines.head;
+      stync.out.write(head.text + '\n');
+      stync.messages.shift();
+      head = stync.messages.head;
     }
 
     if (head) {
-      stync.out.write(head.message);
+      stync.out.write(head.text);
     }
   }
 };
