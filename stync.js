@@ -1,5 +1,10 @@
 var stync = {
   /**
+   * Current stync version (duh).
+   */
+  VERSION: '0.1.2',
+
+  /**
    * Where output should go. Defaults to `process.stdout`.
    */
   out: process.stdout
