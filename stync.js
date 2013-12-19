@@ -15,7 +15,7 @@ stync.Queue = function() {
  * Adds a new {@link stync.Message} to the tail of the queue.
  */
 stync.Queue.prototype.push = function(line) {
-  if (!this.tail) {
+  if (!this.head) {
     this.head = this.tail = line;
   } else {
     this.tail.next = line;
@@ -67,6 +67,13 @@ stync.begin = function(text) {
  */
 stync.write = function(text) {
   stync.begin(text).end();
+};
+
+/**
+ * Empties the queue, effectively starting over.
+ */
+stync.reset = function() {
+  stync.messages = new stync.Queue();
 };
 
 /**
